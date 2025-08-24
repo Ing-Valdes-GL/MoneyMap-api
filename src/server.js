@@ -1,9 +1,9 @@
 import express from 'express';
-import transactionsRoute from './src/routes/transactionsRoute.js';
+import transactionsRoute from './routes/transactionsRoute.js';
 import dotenv from 'dotenv';
-import { sql } from './src/config/db.js';  
-import rateLimiter from './src/middleware/rateLimiter.js';
-import job from './src/config/cron.js'; 
+import { sql } from './config/db.js';  
+import rateLimiter from './middleware/rateLimiter.js';
+import job from './config/cron.js'; 
 
 
 
