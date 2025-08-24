@@ -19,7 +19,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5001;
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.status(200).json({ status: "ok" });
 });
 
 async function init() {
