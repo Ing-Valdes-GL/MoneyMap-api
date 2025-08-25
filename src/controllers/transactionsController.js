@@ -5,21 +5,22 @@ import { sql } from "../config/db.js";
  */
 export async function getTransactionsByUserId(req, res) {
   try {
-    const { userid } = req.params;
-    if (!userid) return res.status(400).json({ message: "User ID is required" });
+    const { userId } = req.params;
 
     const transactions = await sql`
       SELECT * FROM transactions
-      WHERE user_id = ${userid}
+      WHERE user_id = ${userId}
       ORDER BY created_at DESC
+      LIMIT 50
     `;
 
     res.status(200).json(transactions);
   } catch (error) {
-    console.error("Error getting transactions:", error);
+    console.log("Error getting the transactions", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
 
 /**
  * Créer une nouvelle transaction
