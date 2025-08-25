@@ -1,16 +1,17 @@
-import express from "express";
+import express from 'express';
 import {
+  getTransactionsByUserId,
   createTransaction,
   deleteTransaction,
-  getSummaryByUserId,
-  getTransactionsByUserId,
-} from "../controllers/transactionsController.js";
+  getSummaryByUserId
+} from '../controllers/transactionsController.js';
 
 const router = express.Router();
 
-router.get("/:userId", getTransactionsByUserId);
-router.post("/", createTransaction);
-router.delete("/:id", deleteTransaction);
-router.get("/summary/:userId", getSummaryByUserId);
+// **Important : ordre des routes**
+router.get('/summary/:userId', getSummaryByUserId);  // summary avant :userid
+router.get('/:userId', getTransactionsByUserId);     // récupère toutes les transactions
+router.post('/', createTransaction);
+router.delete('/:id', deleteTransaction);
 
 export default router;

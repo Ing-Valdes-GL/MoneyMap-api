@@ -1,8 +1,6 @@
 import { sql } from "../config/db.js";
 
-/**
- * Récupérer toutes les transactions d'un utilisateur
- */
+// Récupère toutes les transactions d'un utilisateur
 export async function getTransactionsByUserId(req, res) {
   try {
     const { userId } = req.params;
@@ -11,101 +9,78 @@ export async function getTransactionsByUserId(req, res) {
       SELECT * FROM transactions
       WHERE user_id = ${userId}
       ORDER BY created_at DESC
-      LIMIT 50
     `;
 
     res.status(200).json(transactions);
   } catch (error) {
-    console.log("Error getting the transactions", error);
+    console.error("Erreur getTransactionsByUserId :", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
 
-
-/**
- * Créer une nouvelle transaction
- */
+// Crée une transaction
 export async function createTransaction(req, res) {
   try {
     const { title, amount, category, user_id } = req.body;
-
     if (!title || !user_id || !category || amount === undefined) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const numericAmount = Number(amount);
-    if (isNaN(numericAmount)) {
-      return res.status(400).json({ message: "Amount must be a number" });
-    }
-
     const [transaction] = await sql`
-      INSERT INTO transactions (user_id, title, amount, category)
-      VALUES (${user_id}, ${title}, ${numericAmount}, ${category})
+      INSERT INTO transactions(user_id, title, amount, category)
+      VALUES (${user_id}, ${title}, ${amount}, ${category})
       RETURNING *
     `;
 
     res.status(201).json(transaction);
   } catch (error) {
-    console.error("Error creating transaction:", error);
+    console.error("Erreur createTransaction :", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
 
-/**
- * Supprimer une transaction par ID
- */
+// Supprime une transaction
 export async function deleteTransaction(req, res) {
   try {
     const { id } = req.params;
-    const numericId = Number(id);
-    if (isNaN(numericId)) return res.status(400).json({ message: "Invalid transaction ID" });
 
-    const [deleted] = await sql`
+    const [result] = await sql`
       DELETE FROM transactions
-      WHERE id = ${numericId}
+      WHERE id = ${id}
       RETURNING *
     `;
 
-    if (!deleted) return res.status(404).json({ message: "Transaction not found" });
+    if (!result) return res.status(404).json({ message: "Transaction not found" });
 
     res.status(200).json({ message: "Transaction deleted successfully" });
   } catch (error) {
-    console.error("Error deleting transaction:", error);
+    console.error("Erreur deleteTransaction :", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
 
-/**
- * Obtenir le résumé des transactions pour un utilisateur
- */
+// Résumé (summary) des transactions
 export async function getSummaryByUserId(req, res) {
   try {
-    const { userid } = req.params;
-    if (!userid) return res.status(400).json({ message: "User ID is required" });
+    const { userId } = req.params;
 
     const [balanceResult] = await sql`
-      SELECT COALESCE(SUM(amount), 0) AS balance
-      FROM transactions
-      WHERE user_id = ${userid}
+      SELECT COALESCE(SUM(amount), 0) AS balance FROM transactions WHERE user_id = ${userId}
     `;
     const [incomeResult] = await sql`
-      SELECT COALESCE(SUM(amount), 0) AS income
-      FROM transactions
-      WHERE user_id = ${userid} AND amount > 0
+      SELECT COALESCE(SUM(amount), 0) AS income FROM transactions WHERE user_id = ${userId} AND amount > 0
     `;
     const [expensesResult] = await sql`
-      SELECT COALESCE(SUM(amount), 0) AS expenses
-      FROM transactions
-      WHERE user_id = ${userid} AND amount < 0
+      SELECT COALESCE(SUM(amount), 0) AS expenses FROM transactions WHERE user_id = ${userId} AND amount < 0
     `;
 
     res.status(200).json({
       balance: balanceResult.balance,
       income: incomeResult.income,
-      expenses: expensesResult.expenses,
+      expenses: expensesResult.expenses
     });
   } catch (error) {
-    console.error("Error getting summary:", error);
+    console.error("Erreur getSummaryByUserId :", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
