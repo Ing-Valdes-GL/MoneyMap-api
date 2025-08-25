@@ -7,7 +7,7 @@ export async function getTransactionsByUserId(req, res) {
 
     const transactions = await sql`
       SELECT * FROM transactions
-      WHERE user_id = ${userId}
+      WHERE user_id = user_31jTmbSsd1wOrZEY2EdXtNzjPCX
       ORDER BY created_at DESC
     `;
 
